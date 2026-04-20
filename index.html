@@ -6,7 +6,7 @@
     <title>EarnFlow App</title>
     
     <!-- Aapka Naya Ad Code -->
-    <script src='//libtl.com/sdk.js' data-zone='9391539' data-sdk='show_9391539'></script>
+    <script src='//libtl.com/sdk.js' data-zone='10898623' data-sdk='show_10898623'></script>
     
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -45,8 +45,8 @@
 
     <!-- Authentication Section -->
     <div id="auth-section" class="min-h-screen p-6 flex-col justify-center main-page">
-        <h1 class="text-4xl font-bold text-center mb-2 text-accent">CashReward</h1>
-        <p class="text-center text-gray-400 mb-8">Jaari rakhne ke liye Login ya Signup karein</p>
+        <h1 class="text-4xl font-bold text-center mb-2 text-accent">EarnFlow</h1>
+        <p class="text-center text-gray-400 mb-8">Welcome To EarnFlow</p>
         <div id="auth-container">
             <div id="login-view">
                 <input id="login-email" type="email" placeholder="Email" class="w-full p-3 rounded-lg input-field mb-4">
@@ -67,7 +67,7 @@
     <!-- Main App Container -->
     <div id="app-container" class="min-h-screen flex-col main-page">
         <header class="flex items-center justify-between p-4 sticky top-0 bg-opacity-80 backdrop-blur-md z-10 dark-bg">
-            <h1 class="text-xl font-bold">CashReward</h1>
+            <h1 class="text-xl font-bold">EarnFlow</h1>
             <div class="flex items-center space-x-4">
                 <div id="notification-bell" class="relative cursor-pointer">
                     <i data-lucide="bell" class="w-6 h-6"></i>
@@ -189,12 +189,12 @@
 
     <script type="module">
         const firebaseConfig = {
-            apiKey: "AIzaSyAjdPczpLlBINxzGQ1dvwDRlvZpdUCfKUk",
-            authDomain: "earningapp-c292c.firebaseapp.com",
-            projectId: "earningapp-c292c",
-            storageBucket: "earningapp-c292c.appspot.com",
-            messagingSenderId: "81626520266",
-            appId: "1:81626520266:web:af31f7d303477a3d973233"
+            apiKey: "AIzaSyDPuRhVgZG9FEZtPyVqNCuVVbpfhB3931I",
+            authDomain: "earnflow-d3729.firebaseapp.com",
+            projectId: "earnflow-d3729",
+            storageBucket: "earnflow-d3729.firebasestorage.app",
+            messagingSenderId: "97824145818",
+            appId: "1:97824145818:web:660e748b1322a4a268fa23"
         };
         
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
@@ -570,23 +570,23 @@
                 return showAlert("Aapki aaj ki ad dekhne ki seema poori ho gayi hai.");
             }
             
-            if (typeof window.show_9391539 !== 'function') {
+            if (typeof window.show_10898623 !== 'function') {
                 return showAlert("Ad service abhi uplabdh nahi hai. Kripya baad mein prayas karein.");
             }
             
             let adPromise;
             switch(taskType) {
                 case 'interstitial':
-                    adPromise = window.show_9391539();
+                    adPromise = window.show_10898623();
                     break;
                 case 'popup':
-                    adPromise = window.show_9391539('pop');
+                    adPromise = window.show_10898623('pop');
                     break;
                 case 'inApp':
-                    adPromise = window.show_9391539({ type: 'inApp', inAppSettings: { frequency: 2, capping: 0.1, interval: 30, timeout: 5, everyPage: false } });
+                    adPromise = window.show_10898623({ type: 'inApp', inAppSettings: { frequency: 2, capping: 0.1, interval: 30, timeout: 5, everyPage: false } });
                     break;
                 case 'miniApp':
-                    adPromise = window.show_9391539();
+                    adPromise = window.show_10898623();
                     break;
                 default:
                     return;
