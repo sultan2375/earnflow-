@@ -483,7 +483,7 @@
                     await updateDoc(newUserRef, { balance: (userData.balance || 0) + 100, referredBy: referrerCode });
                     userData.balance += 100; userData.referredBy = referrerCode;
                     updateUI();
-                    if(isManualApply) showAlert(""Code successfully applied! You have received 100 coins".");
+                    if(isManualApply) showAlert("Code successfully applied! You have received 100 coins.");
                 } else {
                     if(isManualApply) showAlert("Wrong referral code.");
                 }
