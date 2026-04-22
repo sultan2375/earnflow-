@@ -520,11 +520,11 @@
                     userId: currentUser.uid, userName: userData.name, userEmail: userData.email,
                     amount: amount, method: method, paymentDetail: paymentDetail, status: "pending", requestedAt: serverTimestamp()
                 });
-                showAlert("Withdrawal request safaltapoorvak submit ho gayi hai!");
+                showAlert("Withdrawal request has been successfully submitted!");
                 document.getElementById('withdraw-amount').value = '';
                 paymentDetailInput.value = '';
             } catch (error) {
-                showAlert("Request submit karne mein error: " + error.message);
+                showAlert("Error submitting request: " + error.message);
                 await updateBalance(amount);
             }
         }
@@ -538,21 +538,21 @@
             textArea.focus(); textArea.select();
             try {
                 document.execCommand('copy');
-                showAlert("Referral code copy ho gaya!");
+                showAlert("Referral code copyed!");
             } catch (err) {
-                showAlert("Code copy karne mein विफल.");
+                showAlert("Failed to copy code.");
             }
             document.body.removeChild(textArea);
         }
         
         function shareReferralCode() {
-            const text = `CashReward join karein aur paise kamayein! Bonus paane ke liye mera referral code use karein: ${userData.referralCode}`;
+            const text = `Join EarnFlow and earn money! Use my referral code to get a bonus: ${userData.referralCode}`;
             if (navigator.share) {
-                navigator.share({ title: 'CashReward Join Karein!', text: text, url: window.location.href })
+                navigator.share({ title: 'EarnFlow Join Now!', text: text, url: window.location.href })
                     .catch((error) => console.error("Share failed:", error));
             } else {
                 copyReferralCode();
-                showAlert("Share feature available nahi hai. Iske bajaye referral code copy kar diya gaya hai!");
+                showAlert("The share feature is not available. The referral code has been copied instead.!");
             }
         }
 
