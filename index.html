@@ -458,11 +458,11 @@
         }
         
         async function handleApplyReferralCode() {
-            if (userData.referredBy) return showAlert("Aap pehle hi ek referral code istemal kar chuke hain.");
+            if (userData.referredBy) return showAlert("You have already used a referral code.");
             const codeInput = document.getElementById('enter-referral-code');
             const code = codeInput.value.trim().toUpperCase();
-            if (!code) return showAlert("Kripya ek code daalein.");
-            if (code === userData.referralCode) return showAlert("Aap apna khud ka code istemal nahi kar sakte.");
+            if (!code) return showAlert("Please enter a code.");
+            if (code === userData.referralCode) return showAlert("You cannot use your own code..");
             loader.style.display = 'flex';
             await applyReferralBonus(code, true);
             codeInput.value = '';
@@ -483,13 +483,13 @@
                     await updateDoc(newUserRef, { balance: (userData.balance || 0) + 100, referredBy: referrerCode });
                     userData.balance += 100; userData.referredBy = referrerCode;
                     updateUI();
-                    if(isManualApply) showAlert("Code safaltapoorvak apply ho gaya! Aapko 100 coins mile hain.");
+                    if(isManualApply) showAlert(""Code successfully applied! You have received 100 coins".");
                 } else {
-                    if(isManualApply) showAlert("Galat referral code.");
+                    if(isManualApply) showAlert("Wrong referral code.");
                 }
             } catch(error) {
                 console.error("Error applying referral bonus: ", error);
-                if(isManualApply) showAlert("Code apply karte samay error aayi.");
+                if(isManualApply) showAlert("An error occurred while applying the code.");
             }
         }
 
@@ -509,10 +509,10 @@
             const paymentDetail = paymentDetailInput ? paymentDetailInput.value.trim() : '';
             const minWithdrawal = appConfig.minWithdrawal || 5000;
 
-            if (!amount || amount <= 0) return showAlert("Kripya valid amount daalein.");
-            if (amount < minWithdrawal) return showAlert(`Minimum withdrawal ${minWithdrawal} coins hai.`);
+            if (!amount || amount <= 0) return showAlert("Please enter a valid amount.");
+            if (amount < minWithdrawal) return showAlert(`Minimum withdrawal ${minWithdrawal} coins.`);
             if (amount > userData.balance) return showAlert("Insufficient balance.");
-            if (!paymentDetail) return showAlert("Kripya payment detail daalein (UPI ID ya Paytm Number).");
+            if (!paymentDetail) return showAlert("Please enter payment details (Bkash and Nagad Number).");
 
             try {
                 await updateBalance(-amount);
