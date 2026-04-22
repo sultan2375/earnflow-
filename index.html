@@ -275,7 +275,7 @@
                 }
             } catch (error) {
                 console.error("Error fetching user data:", error);
-                showAlert("User data load karne mein error aayi.");
+                showAlert("There was an error loading user data..");
             }
         }
 
@@ -413,7 +413,7 @@
             try {
                 const querySnapshot = await getDocs(q);
                 if (querySnapshot.empty) {
-                    listEl.innerHTML = '<p class="text-gray-400 text-center">Koi notifications nahi hain.</p>';
+                    listEl.innerHTML = '<p class="text-gray-400 text-center">There are no notifications.</p>';
                     return;
                 }
                 listEl.innerHTML = '';
@@ -425,18 +425,18 @@
                 await updateDoc(doc(db, "users", currentUser.uid), { lastNotificationCheck: serverTimestamp() });
             } catch (error) {
                 console.error("Error loading notifications:", error);
-                listEl.innerHTML = '<p class="text-red-400">Notifications load karne mein error aayi.</p>';
+                listEl.innerHTML = '<p class="text-red-400">Notifications There was an error loading.</p>';
             }
         }
 
         async function loadWithdrawalHistory() {
             const historyList = document.getElementById('withdrawal-history-list');
-            historyList.innerHTML = '<p class="text-gray-400">History load ho rahi hai...</p>';
+            historyList.innerHTML = '<p class="text-gray-400">loading history...</p>';
             const q = query(collection(db, "withdrawals"), where("userId", "==", currentUser.uid));
             try {
                 const querySnapshot = await getDocs(q);
                 if (querySnapshot.empty) {
-                    historyList.innerHTML = '<p class="text-gray-400">Aapne abhi tak koi withdrawal nahi kiya hai.</p>';
+                    historyList.innerHTML = '<p class="text-gray-400">You haven't made any withdrawals yet.</p>';
                     return;
                 }
                 const withdrawals = [];
@@ -453,7 +453,7 @@
                 });
             } catch (error) {
                 console.error("Error fetching withdrawal history: ", error);
-                historyList.innerHTML = '<p class="text-red-400">History load karne mein error aayi.</p>';
+                historyList.innerHTML = '<p class="text-red-400">History There was an error loading.</p>';
             }
         }
         
