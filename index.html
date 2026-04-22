@@ -567,11 +567,11 @@
             }
 
             if (userData.dailyAdCount >= (appConfig.dailyAdLimit || 10)) {
-                return showAlert("You have reached your viewing limit for today..");
+                return showAlert("you have reached your viewing limit for today..");
             }
             
             if (typeof window.show_10898623 !== 'function') {
-                return showAlert("The service is currently unavailable. Please try later..");
+                return showAlert("the service is currently unavailable. Please try later..");
             }
             
             let adPromise;
@@ -611,7 +611,7 @@
                 updateAdsLeftCount();
             }).catch(e => {
                 console.error("Ad error:", e);
-                showAlert('The block could not be displayed. Please try later.');
+                showAlert('the block could not be displayed. Please try later.');
             });
         }
 
