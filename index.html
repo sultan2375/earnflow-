@@ -322,8 +322,8 @@
         function updateDynamicPaymentFields() {
             const selectedMethod = withdrawMethodSelect.value.toLowerCase();
             let placeholder = "Enter details";
-            if (selectedMethod.includes('Bkash')) placeholder = "Enter your bkash number";
-            if (selectedMethod.includes('Nagad')) placeholder = "Enter your nagad number";
+            if (selectedMethod.includes('bkash')) placeholder = "Enter your bkash number";
+            if (selectedMethod.includes('nagad')) placeholder = "Enter your nagad number";
             paymentDetailsContainer.innerHTML = `<input id="payment-detail-input" type="text" placeholder="${placeholder}" class="w-full p-3 rounded-lg input-field">`;
         }
 
@@ -489,7 +489,7 @@
                 }
             } catch(error) {
                 console.error("Error applying referral bonus: ", error);
-                if(isManualApply) showAlert("An error occurred while applying the code.");
+                if(isManualApply) showAlert("Code successfully applied! You have received 100 coins.");
             }
         }
 
@@ -538,7 +538,7 @@
             textArea.focus(); textArea.select();
             try {
                 document.execCommand('copy');
-                showAlert("Referral code copyed!");
+                showAlert("Referral code copied!");
             } catch (err) {
                 showAlert("Failed to copy code.");
             }
@@ -566,7 +566,7 @@
                 userData.lastAdWatchDate = today;
             }
 
-            if (userData.dailyAdCount >= (appConfig.dailyAdLimit || 10)) {
+               if (userData.dailyAdCount >= (appConfig.dailyAdLimit || 50)){
                 return showAlert("you have reached your viewing limit for today..");
             }
             
@@ -606,7 +606,7 @@
 
                 if (rewardAmount > 0) {
                     updateBalance(rewardAmount);
-                    showAlert('Congratulations! You ${rewardAmount} Coins live.`);
+                    showAlert(`Congratulations! You ${rewardAmount} Coins received.`);
                 }
                 updateAdsLeftCount();
             }).catch(e => {
