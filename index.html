@@ -149,7 +149,7 @@
                  <button id="share-btn" class="w-full p-3 rounded-lg btn-accent">Share your code</button>
                  <div class="card-bg p-4 rounded-lg mt-6">
                     <h3 class="font-semibold mb-3 text-center">Someone has a referral code?</h3>
-                    <input id="enter-referral-code" type="text" placeholder="Yahan code daalein" class="w-full p-3 rounded-lg input-field mb-3">
+                    <input id="enter-referral-code" type="text" placeholder="join your code" class="w-full p-3 rounded-lg input-field mb-3">
                     <button id="apply-referral-btn" class="w-full p-3 rounded-lg btn-outline-accent">Code Apply</button>
                  </div>
             </div>
@@ -236,7 +236,7 @@
                 currentUser = user;
                 await fetchUserData();
                 if (userData.isBlocked) {
-                    showAlert("Aapka account block kar diya gaya hai.");
+                    showAlert("Your account has been blocked.");
                     await signOut(auth);
                     loader.style.display = 'none';
                     return;
@@ -298,7 +298,7 @@
             profileEmailEl.textContent = userData.email || 'No Email';
             referralCodeEl.textContent = userData.referralCode || '...';
             minWithdrawalInfoEl.textContent = `${appConfig.minWithdrawal || 5000} Coins`;
-            coinValueInfoEl.textContent = `${appConfig.coinValueCoins || 1000} Coins = ₹${appConfig.coinValueBdt || 100}`;
+            coinValueInfoEl.textContent = `${appConfig.coinValueCoins || 1000} Coins = 💸${appConfig.coinValueBdt || 100}`;
             withdrawMethodSelect.innerHTML = '';
             (appConfig.paymentMethods || []).forEach(method => {
                 const option = document.createElement('option');
