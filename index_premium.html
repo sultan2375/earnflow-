@@ -1,0 +1,1799 @@
+<!DOCTYPE html>
+<html lang="bn">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Earn Flow</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css" />
+    <style>
+        :root {
+            --font-body: 'Inter', sans-serif;
+            --font-display: 'Space Grotesk', sans-serif;
+            /* Premium dark palette */
+            --bg: #0D0F14;
+            --surface: #151821;
+            --surface2: #1C2030;
+            --surface3: #232840;
+            --border: #252A3A;
+            --border2: #2E3450;
+            --text-primary: #EEF0F8;
+            --text-secondary: #7B82A0;
+            --text-muted: #4A5070;
+            /* Accent */
+            --accent: #E74C3C;
+            --accent2: #FF6B35;
+            --gold: #F5A623;
+            --gold2: #FFD166;
+            --green: #06D6A0;
+            --blue: #4895EF;
+            /* Glow */
+            --glow-red: rgba(231,76,60,0.18);
+            --glow-gold: rgba(245,166,35,0.15);
+            --glow-green: rgba(6,214,160,0.15);
+        }
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg);
+            color: var(--text-primary);
+            -webkit-font-smoothing: antialiased;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* Ambient background glow */
+        body::before {
+            content: '';
+            position: fixed;
+            top: -30%;
+            left: -20%;
+            width: 80%;
+            height: 80%;
+            background: radial-gradient(ellipse, rgba(231,76,60,0.06) 0%, transparent 65%);
+            pointer-events: none;
+            z-index: 0;
+        }
+        body::after {
+            content: '';
+            position: fixed;
+            bottom: -20%;
+            right: -20%;
+            width: 70%;
+            height: 70%;
+            background: radial-gradient(ellipse, rgba(72,149,239,0.05) 0%, transparent 65%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        #app { max-width: 500px; margin: 0 auto; padding-bottom: 90px; position: relative; z-index: 1; }
+
+        /* ── Pages ── */
+        .page { display: none; padding: 16px; }
+        .page.active { display: block; animation: slideUp 0.38s cubic-bezier(0.16, 1, 0.3, 1); }
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(22px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes fadeIn { from { opacity:0; } to { opacity:1; } }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes pulse { 0%,100%{transform:scale(1);} 50%{transform:scale(1.04);} }
+        @keyframes shimmer {
+            0%   { background-position: -600px 0; }
+            100% { background-position: 600px 0; }
+        }
+        @keyframes countUp {
+            from { opacity:0; transform: translateY(8px); }
+            to   { opacity:1; transform: translateY(0); }
+        }
+        @keyframes barGrow {
+            from { transform: scaleY(0); }
+            to   { transform: scaleY(1); }
+        }
+
+        /* ── App Loader ── */
+        #app-loader {
+            position: fixed; inset: 0; z-index: 9999;
+            display: flex; flex-direction: column;
+            justify-content: center; align-items: center;
+            background: var(--bg);
+            gap: 20px;
+        }
+        .loader-logo {
+            font-family: var(--font-display);
+            font-size: 2rem; font-weight: 700;
+            background: linear-gradient(135deg, var(--accent), var(--gold));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            letter-spacing: -0.5px;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+        .loader-ring {
+            width: 48px; height: 48px;
+            border-radius: 50%;
+            border: 3px solid var(--border2);
+            border-top-color: var(--accent);
+            animation: spin 0.9s linear infinite;
+        }
+        .loader-text { font-size: 0.85rem; color: var(--text-secondary); letter-spacing: 0.05em; }
+        .loader-pct { font-family: var(--font-display); font-size: 1.4rem; font-weight: 700; color: var(--text-primary); }
+
+        /* ── Profile Header ── */
+        .profile-header {
+            position: relative;
+            padding: 28px 20px 24px;
+            background: linear-gradient(180deg, var(--surface2) 0%, var(--surface) 100%);
+            border-bottom: 1px solid var(--border);
+            overflow: hidden;
+        }
+        .profile-header::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, transparent, var(--accent), var(--gold), transparent);
+        }
+        .profile-header-inner {
+            display: flex; align-items: center; gap: 16px;
+        }
+        #user-photo {
+            width: 64px; height: 64px;
+            border-radius: 50%;
+            border: 2.5px solid transparent;
+            background: linear-gradient(var(--surface2),var(--surface2)) padding-box,
+                        linear-gradient(135deg, var(--accent), var(--gold)) border-box;
+            object-fit: cover;
+            flex-shrink: 0;
+        }
+        .profile-text { flex: 1; min-width: 0; }
+        #user-name {
+            font-family: var(--font-display);
+            font-size: 1.2rem; font-weight: 700;
+            white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+            color: var(--text-primary);
+            margin-bottom: 4px;
+        }
+        .balance-chip {
+            display: inline-flex; align-items: center; gap: 6px;
+            background: var(--surface3);
+            border: 1px solid var(--border2);
+            border-radius: 20px;
+            padding: 5px 12px;
+            font-size: 0.82rem;
+        }
+        .balance-chip .coin-icon { color: var(--gold); font-size: 0.8rem; }
+        #user-balance { font-weight: 700; color: var(--gold); }
+        .theme-btn-area { margin-left: auto; }
+
+        /* ── Stats Grid ── */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 20px 0;
+        }
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 18px 16px;
+            position: relative;
+            overflow: hidden;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+        .stat-card:hover { transform: translateY(-2px); border-color: var(--border2); }
+        .stat-card::after {
+            content: '';
+            position: absolute;
+            bottom: 0; left: 0; right: 0;
+            height: 2px;
+            background: linear-gradient(90deg, var(--accent), var(--gold));
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .stat-card:hover::after { opacity: 1; }
+        .stat-card-label {
+            font-size: 0.72rem; font-weight: 600;
+            text-transform: uppercase; letter-spacing: 0.08em;
+            color: var(--text-muted);
+            margin-bottom: 10px;
+        }
+        .stat-card-value {
+            font-family: var(--font-display);
+            font-size: 1.5rem; font-weight: 700;
+            background: linear-gradient(135deg, var(--text-primary), var(--text-secondary));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            animation: countUp 0.5s ease both;
+        }
+        .stat-card-icon {
+            position: absolute; top: 14px; right: 14px;
+            font-size: 1.1rem;
+            opacity: 0.2;
+        }
+
+        /* ── Section Header ── */
+        .section-header {
+            display: flex; align-items: center; justify-content: space-between;
+            margin-bottom: 14px;
+        }
+        .section-title {
+            font-family: var(--font-display);
+            font-size: 1rem; font-weight: 700;
+            color: var(--text-primary);
+            display: flex; align-items: center; gap: 8px;
+        }
+        .section-title::before {
+            content: '';
+            display: inline-block;
+            width: 3px; height: 16px;
+            border-radius: 2px;
+            background: linear-gradient(180deg, var(--accent), var(--gold));
+        }
+
+        /* ── Chart ── */
+        .chart-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+        .chart-wrap {
+            display: flex;
+            justify-content: space-around;
+            align-items: flex-end;
+            height: 120px;
+            margin-top: 16px;
+            padding-top: 10px;
+            border-left: 1px solid var(--border);
+            border-bottom: 1px solid var(--border);
+            position: relative;
+        }
+        .bar {
+            width: 11%;
+            background: linear-gradient(to top, var(--accent), var(--gold));
+            border-radius: 5px 5px 0 0;
+            position: relative;
+            cursor: pointer;
+            transform-origin: bottom;
+            animation: barGrow 0.6s cubic-bezier(0.34,1.56,0.64,1) both;
+            min-height: 4px;
+            transition: filter 0.2s;
+        }
+        .bar:hover { filter: brightness(1.3); }
+        .bar .tooltip {
+            position: absolute; top: -32px; left: 50%;
+            transform: translateX(-50%);
+            background: var(--surface3); color: var(--text-primary);
+            border: 1px solid var(--border2);
+            padding: 4px 8px; border-radius: 6px;
+            font-size: 0.75rem; white-space: nowrap;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.2s;
+            z-index: 10;
+        }
+        .bar:hover .tooltip { opacity: 1; }
+        .chart-labels {
+            display: flex; justify-content: space-around;
+            font-size: 0.7rem; color: var(--text-muted);
+            margin-top: 6px;
+        }
+
+        /* ── Earning Wallet Card ── */
+        .wallet-card {
+            background: linear-gradient(135deg, #1a1f32 0%, #222840 100%);
+            border: 1px solid var(--border2);
+            border-radius: 20px;
+            padding: 24px 20px;
+            margin-bottom: 16px;
+            position: relative;
+            overflow: hidden;
+        }
+        .wallet-card::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--gold), transparent);
+        }
+        .wallet-glow {
+            position: absolute; top: -30%; right: -10%;
+            width: 200px; height: 200px;
+            border-radius: 50%;
+            background: radial-gradient(circle, var(--glow-gold) 0%, transparent 70%);
+            pointer-events: none;
+        }
+        .wallet-label {
+            font-size: 0.75rem; font-weight: 600; text-transform: uppercase;
+            letter-spacing: 0.1em; color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+        .wallet-amount {
+            font-family: var(--font-display);
+            font-size: 2.4rem; font-weight: 700;
+            background: linear-gradient(135deg, var(--gold), var(--gold2));
+            -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+            line-height: 1.1;
+        }
+        .wallet-unit { font-size: 1rem; opacity: 0.6; }
+        .wallet-hint {
+            font-size: 0.78rem; color: var(--text-muted);
+            margin: 8px 0 16px;
+        }
+
+        /* ── Progress Bar ── */
+        .progress-container { margin-bottom: 16px; }
+        .progress-info {
+            display: flex; justify-content: space-between;
+            font-size: 0.82rem; font-weight: 500; color: var(--text-secondary);
+            margin-bottom: 8px;
+        }
+        .progress-track {
+            width: 100%; height: 6px; border-radius: 3px;
+            background: var(--border2);
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%; border-radius: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--gold));
+            transition: width 0.8s cubic-bezier(0.34,1.2,0.64,1);
+            position: relative;
+        }
+        .progress-fill::after {
+            content: '';
+            position: absolute; right: 0; top: 50%;
+            transform: translateY(-50%);
+            width: 10px; height: 10px; border-radius: 50%;
+            background: var(--gold);
+            box-shadow: 0 0 8px var(--gold);
+        }
+
+        /* ── Task Cards ── */
+        .task-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 12px;
+            display: flex; align-items: center; gap: 14px;
+            transition: transform 0.2s, border-color 0.2s, box-shadow 0.2s;
+            position: relative;
+            overflow: hidden;
+        }
+        .task-card:hover {
+            transform: translateY(-2px);
+            border-color: var(--border2);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.3);
+        }
+        .task-icon-wrap {
+            width: 46px; height: 46px; border-radius: 12px;
+            overflow: hidden; flex-shrink: 0;
+            background: var(--surface2);
+            display: flex; align-items: center; justify-content: center;
+        }
+        .task-icon-img { width: 46px; height: 46px; object-fit: cover; border-radius: 12px; }
+        .task-info { flex: 1; min-width: 0; }
+        .task-info h3 {
+            font-size: 0.95rem; font-weight: 600; color: var(--text-primary);
+            margin-bottom: 3px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+        }
+        .task-info p {
+            font-size: 0.78rem; color: var(--text-secondary);
+        }
+        .task-reward-badge {
+            display: inline-flex; align-items: center; gap: 4px;
+            background: linear-gradient(135deg, rgba(245,166,35,0.12), rgba(255,209,102,0.08));
+            border: 1px solid rgba(245,166,35,0.25);
+            color: var(--gold);
+            border-radius: 8px; padding: 3px 8px;
+            font-size: 0.75rem; font-weight: 700;
+            margin-top: 4px;
+        }
+
+        /* ── Action Button ── */
+        .action-btn {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 9px 18px;
+            font-size: 0.82rem; font-weight: 700;
+            font-family: var(--font-body);
+            color: #fff; border: none; border-radius: 10px; cursor: pointer;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            box-shadow: 0 4px 14px rgba(231,76,60,0.35);
+            transition: all 0.2s; white-space: nowrap; flex-shrink: 0;
+            position: relative; overflow: hidden;
+        }
+        .action-btn::before {
+            content: '';
+            position: absolute; inset: 0;
+            background: linear-gradient(135deg, rgba(255,255,255,0.15), transparent);
+            opacity: 0;
+            transition: opacity 0.2s;
+        }
+        .action-btn:hover::before { opacity: 1; }
+        .action-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 20px rgba(231,76,60,0.45); }
+        .action-btn:active { transform: translateY(0); }
+        .action-btn:disabled {
+            background: var(--surface3); color: var(--text-muted);
+            box-shadow: none; cursor: not-allowed;
+        }
+        .action-btn.gold {
+            background: linear-gradient(135deg, var(--gold), var(--gold2));
+            box-shadow: 0 4px 14px rgba(245,166,35,0.3);
+            color: #0D0F14;
+        }
+        .action-btn.gold:hover { box-shadow: 0 6px 20px rgba(245,166,35,0.45); }
+        .action-btn.full { width: 100%; justify-content: center; }
+        .action-btn.ghost {
+            background: transparent;
+            border: 1px solid var(--border2);
+            color: var(--text-secondary);
+            box-shadow: none;
+        }
+        .action-btn.ghost:hover { border-color: var(--accent); color: var(--accent); }
+
+        /* ── Micro Job Card (new) ── */
+        .micro-job-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            padding: 0;
+            margin-bottom: 14px;
+            overflow: hidden;
+            transition: transform 0.22s, box-shadow 0.22s;
+        }
+        .micro-job-card:hover { transform: translateY(-3px); box-shadow: 0 10px 30px rgba(0,0,0,0.4); }
+        .micro-job-header {
+            background: linear-gradient(135deg, var(--surface2), var(--surface3));
+            border-bottom: 1px solid var(--border);
+            padding: 14px 16px;
+            display: flex; align-items: center; gap: 12px;
+        }
+        .micro-job-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 6px;
+            padding: 3px 9px;
+            font-size: 0.7rem; font-weight: 700;
+            text-transform: uppercase; letter-spacing: 0.05em;
+            color: var(--text-secondary);
+            margin-left: auto;
+        }
+        .micro-job-badge.easy { color: var(--green); border-color: rgba(6,214,160,0.3); background: rgba(6,214,160,0.07); }
+        .micro-job-badge.medium { color: var(--gold); border-color: rgba(245,166,35,0.3); background: rgba(245,166,35,0.07); }
+        .micro-job-badge.hard { color: var(--accent); border-color: rgba(231,76,60,0.3); background: rgba(231,76,60,0.07); }
+        .micro-job-title {
+            font-family: var(--font-display);
+            font-size: 1rem; font-weight: 700;
+            color: var(--text-primary);
+        }
+        .micro-job-body { padding: 14px 16px; }
+        .micro-job-desc {
+            font-size: 0.83rem; color: var(--text-secondary);
+            line-height: 1.55; margin-bottom: 12px;
+        }
+        .micro-job-meta {
+            display: flex; gap: 10px; flex-wrap: wrap; margin-bottom: 12px;
+        }
+        .meta-pill {
+            display: inline-flex; align-items: center; gap: 5px;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 4px 10px;
+            font-size: 0.75rem; color: var(--text-secondary);
+        }
+        .meta-pill i { font-size: 0.7rem; }
+        .micro-job-footer {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 16px;
+            border-top: 1px solid var(--border);
+            background: var(--surface2);
+        }
+        .reward-amount {
+            font-family: var(--font-display);
+            font-size: 1.15rem; font-weight: 700;
+            color: var(--gold);
+            display: flex; align-items: center; gap: 5px;
+        }
+        .reward-label { font-size: 0.7rem; color: var(--text-muted); font-weight: 500; }
+
+        /* ── Jobs Filter Tabs ── */
+        .filter-tabs {
+            display: flex; gap: 8px;
+            overflow-x: auto; padding-bottom: 4px;
+            margin-bottom: 16px;
+            scrollbar-width: none;
+        }
+        .filter-tabs::-webkit-scrollbar { display: none; }
+        .filter-tab {
+            flex-shrink: 0;
+            padding: 7px 16px;
+            border-radius: 20px;
+            border: 1px solid var(--border2);
+            background: transparent;
+            color: var(--text-secondary);
+            font-family: var(--font-body);
+            font-size: 0.8rem; font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .filter-tab.active {
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            border-color: transparent;
+            color: #fff;
+            box-shadow: 0 4px 12px rgba(231,76,60,0.3);
+        }
+        .filter-tab:hover:not(.active) { border-color: var(--accent); color: var(--accent); }
+
+        /* ── Bottom Nav ── */
+        .bottom-nav {
+            position: fixed; bottom: 0; left: 0; right: 0;
+            max-width: 500px; margin: 0 auto;
+            display: flex; justify-content: space-around;
+            padding: 0;
+            background: rgba(13,15,20,0.9);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border-top: 1px solid var(--border);
+            z-index: 1000;
+            height: 64px;
+        }
+        .nav-btn {
+            background: none; border: none; cursor: pointer;
+            display: flex; flex-direction: column; align-items: center;
+            justify-content: center;
+            font-family: var(--font-body);
+            font-size: 0.65rem; font-weight: 600;
+            color: var(--text-muted);
+            flex: 1; gap: 4px;
+            transition: color 0.2s;
+            position: relative;
+            text-transform: uppercase; letter-spacing: 0.05em;
+        }
+        .nav-btn i { font-size: 1.25rem; transition: transform 0.2s; }
+        .nav-btn.active { color: var(--accent); }
+        .nav-btn.active i { transform: translateY(-2px); }
+        .nav-btn::before {
+            content: '';
+            position: absolute; top: 0; left: 20%; right: 20%;
+            height: 2px; border-radius: 0 0 2px 2px;
+            background: linear-gradient(90deg, var(--accent), var(--gold));
+            opacity: 0; transition: opacity 0.2s;
+        }
+        .nav-btn.active::before { opacity: 1; }
+
+        /* ── Popup ── */
+        .popup-overlay {
+            position: fixed; inset: 0;
+            background: rgba(0,0,0,0.7);
+            backdrop-filter: blur(6px);
+            display: none; justify-content: center; align-items: center;
+            z-index: 10000;
+        }
+        .popup-content {
+            background: var(--surface);
+            border: 1px solid var(--border2);
+            border-radius: 20px;
+            padding: 28px 24px;
+            text-align: center;
+            max-width: 88%; width: 88%;
+            animation: slideUp 0.3s cubic-bezier(0.16,1,0.3,1);
+        }
+        .popup-content h2 {
+            font-family: var(--font-display);
+            font-size: 1.2rem; font-weight: 700;
+            color: var(--accent);
+            margin-bottom: 10px;
+        }
+        .popup-content p { font-size: 0.9rem; color: var(--text-secondary); margin-bottom: 20px; }
+        .popup-close-btn { /* uses .action-btn */ }
+        .popup-loader .loader-ring { margin: 0 auto 16px; }
+        .error-popup { border-left: 3px solid var(--danger, #C0392B); }
+        .error-popup h2 { color: #C0392B; }
+
+        /* ── Leaderboard ── */
+        .leaderboard-toggle {
+            display: flex;
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 4px; gap: 4px;
+            margin-bottom: 16px;
+        }
+        .toggle-btn {
+            flex: 1; padding: 10px;
+            border: none; background: none;
+            border-radius: 8px;
+            font-size: 0.82rem; font-weight: 600;
+            cursor: pointer;
+            font-family: var(--font-body);
+            color: var(--text-muted);
+            transition: all 0.2s;
+        }
+        .toggle-btn.active {
+            background: var(--surface3);
+            color: var(--text-primary);
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        .leaderboard-list { list-style: none; }
+        .leaderboard-item {
+            display: flex; align-items: center;
+            padding: 12px 14px; margin-bottom: 8px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 14px;
+            transition: transform 0.15s;
+        }
+        .leaderboard-item:hover { transform: translateX(4px); }
+        .leaderboard-item:nth-child(1) { border-color: rgba(255,215,0,0.3); }
+        .leaderboard-item:nth-child(2) { border-color: rgba(192,192,192,0.3); }
+        .leaderboard-item:nth-child(3) { border-color: rgba(205,127,50,0.3); }
+        .rank { font-family: var(--font-display); font-size: 1rem; font-weight: 700; width: 36px; }
+        .rank-1 { color: #FFD700; text-shadow: 0 0 10px rgba(255,215,0,0.5); }
+        .rank-2 { color: #C0C0C0; }
+        .rank-3 { color: #CD7F32; }
+        .leaderboard-item img { width: 40px; height: 40px; border-radius: 50%; margin-right: 12px; object-fit: cover; border: 2px solid var(--border2); }
+        .leaderboard-name { font-size: 0.9rem; font-weight: 600; flex-grow: 1; }
+        .leaderboard-score { font-family: var(--font-display); font-weight: 700; color: var(--gold); font-size: 0.95rem; }
+
+        /* ── History Item ── */
+        .history-item {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 14px 16px; border-radius: 14px; margin-bottom: 10px;
+            background: var(--surface); border: 1px solid var(--border);
+        }
+        .history-details p { font-weight: 600; font-size: 0.9rem; }
+        .history-details small { font-size: 0.75rem; color: var(--text-muted); }
+        .history-status {
+            padding: 5px 12px; border-radius: 20px;
+            font-size: 0.75rem; font-weight: 700; text-transform: capitalize;
+        }
+        .status-completed { background: rgba(6,214,160,0.15); color: var(--green); border: 1px solid rgba(6,214,160,0.3); }
+        .status-pending { background: rgba(245,166,35,0.12); color: var(--gold); border: 1px solid rgba(245,166,35,0.3); }
+        .status-rejected { background: rgba(192,57,43,0.12); color: #E74C3C; border: 1px solid rgba(192,57,43,0.3); }
+
+        /* ── Referral Card ── */
+        .referral-card {
+            background: linear-gradient(135deg, var(--surface2), var(--surface3));
+            border: 1px solid var(--border2);
+            border-radius: 18px; padding: 20px;
+            margin-bottom: 14px;
+            position: relative; overflow: hidden;
+        }
+        .referral-card::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--blue), transparent);
+        }
+        .referral-title {
+            font-family: var(--font-display);
+            font-size: 1.1rem; font-weight: 700; margin-bottom: 6px;
+        }
+        .referral-desc { font-size: 0.83rem; color: var(--text-secondary); margin-bottom: 14px; }
+        .referral-link-box {
+            display: flex; gap: 8px; align-items: center;
+        }
+        #referral-link {
+            flex: 1; padding: 10px 12px;
+            background: var(--surface); border: 1px dashed var(--border2);
+            border-radius: 10px; font-size: 0.78rem; color: var(--text-secondary);
+            font-family: var(--font-body); outline: none;
+        }
+
+        /* ── Form Styles ── */
+        .form-card {
+            background: var(--surface); border: 1px solid var(--border);
+            border-radius: 18px; padding: 20px; margin-bottom: 14px;
+        }
+        .form-card h3 {
+            font-family: var(--font-display);
+            font-size: 1rem; font-weight: 700; margin-bottom: 16px;
+        }
+        .form-group { margin-bottom: 12px; }
+        .form-label {
+            font-size: 0.78rem; font-weight: 600;
+            color: var(--text-secondary);
+            display: block; margin-bottom: 6px;
+        }
+        .form-input, .form-select {
+            width: 100%; padding: 11px 14px;
+            background: var(--surface2); border: 1px solid var(--border2);
+            border-radius: 10px; color: var(--text-primary);
+            font-family: var(--font-body); font-size: 0.88rem;
+            outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-input:focus, .form-select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px rgba(231,76,60,0.12);
+        }
+        .form-select option { background: var(--surface2); }
+
+        /* ── Empty State ── */
+        .empty-state {
+            text-align: center; padding: 48px 20px;
+            color: var(--text-muted);
+        }
+        .empty-state i { font-size: 3rem; margin-bottom: 12px; opacity: 0.4; display: block; }
+        .empty-state p { font-size: 0.88rem; }
+
+        /* ── Skeleton Loader ── */
+        .skeleton {
+            background: linear-gradient(90deg, var(--surface2) 25%, var(--surface3) 50%, var(--surface2) 75%);
+            background-size: 600px 100%;
+            animation: shimmer 1.4s infinite linear;
+            border-radius: 8px;
+        }
+
+        /* ── Notification toast ── */
+        #toast {
+            position: fixed; top: 20px; left: 50%; transform: translateX(-50%) translateY(-80px);
+            background: var(--surface2); border: 1px solid var(--border2);
+            border-radius: 12px; padding: 12px 18px;
+            font-size: 0.85rem; font-weight: 600;
+            z-index: 99999; transition: transform 0.35s cubic-bezier(0.16,1,0.3,1);
+            white-space: nowrap; box-shadow: 0 8px 24px rgba(0,0,0,0.4);
+            display: flex; align-items: center; gap: 8px;
+        }
+        #toast.show { transform: translateX(-50%) translateY(0); }
+        #toast.success { border-color: rgba(6,214,160,0.4); color: var(--green); }
+        #toast.error { border-color: rgba(231,76,60,0.4); color: var(--accent); }
+
+        /* ── Micro Jobs Page specific ── */
+        .jobs-hero {
+            background: linear-gradient(135deg, #1a1f32 0%, #141828 100%);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            padding: 22px 20px;
+            margin-bottom: 18px;
+            position: relative; overflow: hidden;
+            display: flex; align-items: center; gap: 14px;
+        }
+        .jobs-hero::before {
+            content: '';
+            position: absolute; top: 0; left: 0; right: 0; height: 1px;
+            background: linear-gradient(90deg, transparent, var(--blue), transparent);
+        }
+        .jobs-hero-icon {
+            width: 56px; height: 56px; border-radius: 14px;
+            background: linear-gradient(135deg, #4895EF22, #4895EF44);
+            border: 1px solid rgba(72,149,239,0.3);
+            display: flex; align-items: center; justify-content: center;
+            font-size: 1.6rem; flex-shrink: 0;
+        }
+        .jobs-hero-text h2 {
+            font-family: var(--font-display);
+            font-size: 1.1rem; font-weight: 700; margin-bottom: 4px;
+        }
+        .jobs-hero-text p { font-size: 0.8rem; color: var(--text-secondary); }
+
+        /* ── Retry button ── */
+        .retry-btn {
+            padding: 10px 25px; border: none; border-radius: 10px;
+            color: #fff; background: linear-gradient(135deg, var(--accent), var(--accent2));
+            cursor: pointer; font-family: var(--font-body); font-size: 0.9rem;
+            font-weight: 700; margin-top: 10px;
+            box-shadow: 0 4px 14px rgba(231,76,60,0.35);
+        }
+
+        /* ── Scrollbar ── */
+        ::-webkit-scrollbar { width: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+        /* ── Page headers ── */
+        .page-title {
+            font-family: var(--font-display);
+            font-size: 1.3rem; font-weight: 700;
+            margin-bottom: 18px;
+        }
+    </style>
+</head>
+<body>
+
+    <!-- App Loader -->
+    <div id="app-loader">
+        <div class="loader-logo">⚡ Earn Flow</div>
+        <div class="loader-ring"></div>
+        <div class="loader-pct" id="loading-progress">0%</div>
+        <div class="loader-text" id="loading-text">Starting...</div>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast"></div>
+
+    <!-- Popup -->
+    <div id="popup" class="popup-overlay">
+        <div class="popup-content">
+            <div id="popup-body"></div>
+        </div>
+    </div>
+
+    <div id="app" style="display: none;">
+        <!-- Profile Header -->
+        <header class="profile-header">
+            <div class="profile-header-inner">
+                <img id="user-photo" src="https://via.placeholder.com/64" alt="User">
+                <div class="profile-text">
+                    <div id="user-name">Loading...</div>
+                    <div class="balance-chip">
+                        <i class="fas fa-coins coin-icon"></i>
+                        <span>Balance:</span>
+                        <span id="user-balance">0.00</span>
+                        <span>Coin</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <main id="main-content">
+            <!-- HOME PAGE -->
+            <div id="home-page" class="page active">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <i class="fas fa-play-circle stat-card-icon" style="color:var(--accent)"></i>
+                        <div class="stat-card-label">Today's Ads</div>
+                        <div class="stat-card-value" id="daily-ads-watched">0 / 0</div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-users stat-card-icon" style="color:var(--blue)"></i>
+                        <div class="stat-card-label">Total Referrals</div>
+                        <div class="stat-card-value" id="referral-count">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-eye stat-card-icon" style="color:var(--green)"></i>
+                        <div class="stat-card-label">Total Ads Watched</div>
+                        <div class="stat-card-value" id="total-ads-watched">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <i class="fas fa-wallet stat-card-icon" style="color:var(--gold)"></i>
+                        <div class="stat-card-label">Total Income</div>
+                        <div class="stat-card-value" id="total-earned">0.00</div>
+                    </div>
+                </div>
+
+                <div class="chart-card">
+                    <div class="section-header" style="margin-bottom:0">
+                        <div class="section-title">Last 7 Days</div>
+                    </div>
+                    <div id="earnings-chart" class="chart-wrap"></div>
+                    <div id="earnings-chart-labels" class="chart-labels"></div>
+                </div>
+
+                <div id="dynamic-links-container" style="margin-top:4px;"></div>
+            </div>
+
+            <!-- TASKS PAGE -->
+            <div id="tasks-page" class="page">
+                <div class="wallet-card">
+                    <div class="wallet-glow"></div>
+                    <div class="wallet-label"><i class="fas fa-coins" style="color:var(--gold);margin-right:5px"></i>Earning Wallet</div>
+                    <div class="wallet-amount"><span id="earning-wallet-balance">0.00</span><span class="wallet-unit"> Coin</span></div>
+                    <div class="wallet-hint">Minimum 50 Coin to move to main balance.</div>
+                    <button id="move-to-balance-btn" class="action-btn gold full" disabled>
+                        <i class="fas fa-arrow-right-arrow-left"></i> Move to Main Balance
+                    </button>
+                </div>
+                <div id="ad-progress-container" class="progress-container"></div>
+                <div id="ad-task-container"></div>
+                <div class="section-header" style="margin-top:8px">
+                    <div class="section-title">Bonus Tasks</div>
+                </div>
+                <div id="dynamic-tasks-container"></div>
+            </div>
+
+            <!-- MICRO JOBS PAGE (NEW) -->
+            <div id="jobs-page" class="page">
+                <div class="jobs-hero">
+                    <div class="jobs-hero-icon">💼</div>
+                    <div class="jobs-hero-text">
+                        <h2>Micro Jobs</h2>
+                        <p>Complete small tasks. Earn real Coin.</p>
+                    </div>
+                </div>
+                <div class="filter-tabs" id="jobs-filter-tabs">
+                    <button class="filter-tab active" data-filter="all">All Jobs</button>
+                    <button class="filter-tab" data-filter="easy">Easy</button>
+                    <button class="filter-tab" data-filter="medium">Medium</button>
+                    <button class="filter-tab" data-filter="hard">Hard</button>
+                    <button class="filter-tab" data-filter="completed">Completed</button>
+                </div>
+                <div id="micro-jobs-container"></div>
+            </div>
+
+            <!-- LEADERBOARD PAGE -->
+            <div id="leaderboard-page" class="page">
+                <div class="page-title">🏆 Leaderboard</div>
+                <div class="leaderboard-toggle">
+                    <button class="toggle-btn active" data-board="referral">Top Referrers</button>
+                    <button class="toggle-btn" data-board="earning">Top Earners</button>
+                </div>
+                <div id="referral-board"><ul class="leaderboard-list" id="referral-leaderboard-list"></ul></div>
+                <div id="earning-board" style="display:none;"><ul class="leaderboard-list" id="earning-leaderboard-list"></ul></div>
+            </div>
+
+            <!-- PROFILE PAGE -->
+            <div id="profile-page" class="page">
+                <div class="page-title">👤 Profile</div>
+                <div id="referral-section"></div>
+                <div id="withdraw-section" style="margin-top:4px;"></div>
+                <div id="withdrawal-history-section" style="margin-top:18px;">
+                    <div class="section-header">
+                        <div class="section-title">Withdrawal History</div>
+                    </div>
+                    <div id="withdrawal-history-list"></div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Bottom Nav with 5 items now -->
+        <nav class="bottom-nav">
+            <button class="nav-btn active" data-page="home-page"><i class="fas fa-home"></i><span>Home</span></button>
+            <button class="nav-btn" data-page="tasks-page"><i class="fas fa-tasks"></i><span>Tasks</span></button>
+            <button class="nav-btn" data-page="jobs-page"><i class="fas fa-briefcase"></i><span>Jobs</span></button>
+            <button class="nav-btn" data-page="leaderboard-page"><i class="fas fa-trophy"></i><span>Top</span></button>
+            <button class="nav-btn" data-page="profile-page"><i class="fas fa-user-alt"></i><span>Profile</span></button>
+        </nav>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', () => {
+
+        // ─── Telegram Setup ───────────────────────────────────────────────
+        const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : null;
+        if (tg) { tg.ready(); tg.expand(); }
+
+        const theme = (tg && tg.colorScheme) ? tg.colorScheme : 'dark';
+        // Always dark theme for premium look
+        document.body.dataset.theme = 'dark';
+
+        // ─── Firebase Config ──────────────────────────────────────────────
+        const firebaseConfig = {
+            apiKey: "AIzaSyDX4H6hl8gGx59KrfwuODOTJDkwChcOO-w",
+            authDomain: "clone-afefa.firebaseapp.com",
+            databaseURL: "https://clone-afefa-default-rtdb.firebaseio.com",
+            projectId: "clone-afefa",
+            storageBucket: "clone-afefa.firebasestorage.app",
+            messagingSenderId: "118515097456",
+            appId: "1:118515097456:web:8e40eb88450be30500f9b5"
+        };
+
+        // ─── State ────────────────────────────────────────────────────────
+        let appConfig = {};
+        let userState = {};
+        let tgUser = {};
+        let earningWalletBalance = 0;
+        let leaderboardData = { referral: [], earning: [] };
+        let userTransactions = [];
+        let db = null;
+        let activeJobFilter = 'all';
+        let completedMicroJobs = {};
+
+        // ─── UI Helpers ───────────────────────────────────────────────────
+        const popup = document.getElementById('popup');
+        const popupBody = document.getElementById('popup-body');
+        const loadingProgressEl = document.getElementById('loading-progress');
+        const loadingTextEl = document.getElementById('loading-text');
+        const toastEl = document.getElementById('toast');
+        let toastTimer;
+
+        const showPopup = (content) => {
+            popupBody.innerHTML = content;
+            popup.style.display = 'flex';
+        };
+        const closePopup = () => { popup.style.display = 'none'; };
+
+        const updateProgress = (pct, text) => {
+            loadingProgressEl.textContent = `${pct}%`;
+            if (text) loadingTextEl.textContent = text;
+        };
+
+        const showToast = (msg, type = 'success') => {
+            clearTimeout(toastTimer);
+            const icon = type === 'success' ? '✅' : '⚠️';
+            toastEl.innerHTML = `${icon} ${msg}`;
+            toastEl.className = `show ${type}`;
+            toastTimer = setTimeout(() => { toastEl.className = ''; }, 3000);
+        };
+
+        const showAlert = (msg) => {
+            if (tg) tg.showAlert(msg);
+            else showToast(msg, 'success');
+        };
+
+        const showError = (title, msg) => {
+            showPopup(`<div class="error-popup">
+                <h2>⚠️ ${title}</h2>
+                <p>${msg}</p>
+                <button class="action-btn popup-close-btn" style="width:100%;margin-top:8px;">OK</button>
+            </div>`);
+        };
+
+        const showRetryError = (title, msg, retryFn) => {
+            showPopup(`<div class="error-popup">
+                <h2>⚠️ ${title}</h2>
+                <p>${msg}</p>
+                <button class="retry-btn" onclick="(${retryFn.toString()})()">Retry</button>
+            </div>`);
+        };
+
+        // ─── Firebase Init ────────────────────────────────────────────────
+        const initFirebase = () => {
+            if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
+            db = firebase.database();
+        };
+
+        // ─── Fetch Config ─────────────────────────────────────────────────
+        const fetchConfig = async () => {
+            const snap = await db.ref('config').once('value');
+            if (!snap.exists()) throw new Error('App config not found.');
+            return snap.val();
+        };
+
+        // ─── Load User ────────────────────────────────────────────────────
+        const loadAndListenUser = (userId) => {
+            return new Promise((resolve, reject) => {
+                let firstLoad = true;
+                const userRef = db.ref(`users/${userId}`);
+                userRef.on('value', async (snap) => {
+                    try {
+                        let userData = snap.val();
+                        if (!userData) {
+                            const startParam = tg && tg.initDataUnsafe ? tg.initDataUnsafe.start_param : null;
+                            const referralId = (
+                                startParam && !isNaN(startParam) &&
+                                String(startParam).trim() !== String(tgUser.id).trim()
+                            ) ? String(startParam).trim() : null;
+
+                            userData = {
+                                id: tgUser.id,
+                                firstName: tgUser.first_name || '',
+                                lastName: tgUser.last_name || '',
+                                username: tgUser.username || '',
+                                photoUrl: tgUser.photo_url || '',
+                                balance: 0, referrals: 0, referredBy: referralId,
+                                totalEarned: 0, lifetimeAdCount: 0,
+                                lastAdWatchDate: '1970-01-01', dailyAdCount: 0,
+                                breakUntil: 0, completedTasks: {}, welcomed: false
+                            };
+                            await userRef.set(userData);
+
+                            if (referralId) {
+                                const referrerRef = db.ref(`users/${referralId}`);
+                                const bonusAmount = parseFloat(appConfig.referralBonus || 0);
+                                const referrerSnap = await referrerRef.once('value');
+                                if (referrerSnap.exists()) {
+                                    const refUpdates = { referrals: firebase.database.ServerValue.increment(1) };
+                                    if (bonusAmount > 0) refUpdates.balance = firebase.database.ServerValue.increment(bonusAmount);
+                                    await referrerRef.update(refUpdates);
+                                }
+                            }
+                        }
+
+                        const today = new Date().toISOString().slice(0, 10);
+                        if (userData.lastAdWatchDate !== today) {
+                            userData.dailyAdCount = 0;
+                            userData.lastAdWatchDate = today;
+                            await userRef.update({ dailyAdCount: 0, lastAdWatchDate: today });
+                        }
+                        userState = userData;
+                        if (firstLoad) { firstLoad = false; resolve(); }
+                        else if (document.getElementById('app').style.display !== 'none') renderUI();
+                    } catch (err) {
+                        if (firstLoad) { firstLoad = false; reject(err); }
+                    }
+                }, (err) => {
+                    if (firstLoad) { firstLoad = false; reject(err); }
+                });
+            });
+        };
+
+        // ─── Leaderboard ──────────────────────────────────────────────────
+        const fetchLeaderboard = async () => {
+            const [refSnap, earnSnap] = await Promise.all([
+                db.ref('users').orderByChild('referrals').limitToLast(20).once('value'),
+                db.ref('users').orderByChild('totalEarned').limitToLast(20).once('value')
+            ]);
+            const toArr = (snap) => { const a = []; snap.forEach(c => a.unshift(c.val())); return a; };
+            leaderboardData.referral = toArr(refSnap);
+            leaderboardData.earning  = toArr(earnSnap);
+        };
+
+        // ─── Transaction History ──────────────────────────────────────────
+        const loadTransactionHistory = async () => {
+            userTransactions = [];
+            const statuses = ['pending', 'completed', 'rejected'];
+            const promises = statuses.map(s =>
+                db.ref(`withdrawals/${s}`).orderByChild('userId').equalTo(tgUser.id).once('value')
+            );
+            const snapshots = await Promise.all(promises);
+            snapshots.forEach(snap => { snap.forEach(child => { userTransactions.push(child.val()); }); });
+            userTransactions.sort((a, b) => {
+                const ta = typeof a.timestamp === 'number' ? a.timestamp : 0;
+                const tb = typeof b.timestamp === 'number' ? b.timestamp : 0;
+                return tb - ta;
+            });
+        };
+
+        // ─── Init App ─────────────────────────────────────────────────────
+        const initApp = async () => {
+            try {
+                updateProgress(10, 'Connecting to Firebase...');
+                initFirebase();
+
+                updateProgress(25, 'Loading app config...');
+                appConfig = await fetchConfig();
+
+                if (appConfig.adZoneId) {
+                    const s = document.createElement('script');
+                    s.src = `https://fstatic.monetag.com/js/${appConfig.adZoneId}.js`;
+                    document.head.appendChild(s);
+                }
+
+                updateProgress(40, 'Verifying identity...');
+                tgUser = (tg && tg.initDataUnsafe && tg.initDataUnsafe.user)
+                    ? tg.initDataUnsafe.user
+                    : { id: 'test_user_123', first_name: 'Test', last_name: 'User', photo_url: '' };
+
+                if (!tgUser.id) throw new Error('Could not identify Telegram user.');
+
+                updateProgress(60, 'Loading your data...');
+                earningWalletBalance = parseFloat(localStorage.getItem(`earningWallet_${tgUser.id}`)) || 0;
+                await loadAndListenUser(tgUser.id);
+
+                updateProgress(80, 'Fetching leaderboards...');
+                await Promise.all([fetchLeaderboard(), loadTransactionHistory()]);
+
+                updateProgress(95, 'Loading micro jobs...');
+                const jobsSnap = await db.ref(`users/${tgUser.id}/completedMicroJobs`).once('value');
+                completedMicroJobs = jobsSnap.val() || {};
+
+                updateProgress(100, 'Done!');
+                await new Promise(r => setTimeout(r, 400));
+
+                document.getElementById('app-loader').style.display = 'none';
+                document.getElementById('app').style.display = 'block';
+
+                renderUI();
+                renderMicroJobs();
+                setupNavigation();
+                setupEventListeners();
+
+                if (!userState.welcomed && tg) {
+                    tg.showPopup({
+                        title: '🎉 Welcome to Earn Flow!',
+                        message: 'Watch ads, complete tasks & micro jobs to earn Coin!',
+                        buttons: [{ type: 'ok' }]
+                    });
+                    await db.ref(`users/${tgUser.id}/welcomed`).set(true);
+                }
+
+            } catch (err) {
+                console.error(err);
+                showRetryError('Connection Failed', err.message || 'Could not connect. Please check your internet connection.', initApp);
+            }
+        };
+
+        // ─── Render UI ────────────────────────────────────────────────────
+        const renderUI = () => {
+            document.getElementById('user-photo').src = userState.photoUrl || 'https://via.placeholder.com/64';
+            document.getElementById('user-name').textContent =
+                `${userState.firstName || ''} ${userState.lastName || ''}`.trim() || 'User';
+            document.getElementById('user-balance').textContent = (userState.balance || 0).toFixed(2);
+            document.getElementById('daily-ads-watched').textContent =
+                `${userState.dailyAdCount || 0} / ${appConfig.dailyAdLimit || 0}`;
+            document.getElementById('referral-count').textContent = userState.referrals || 0;
+            document.getElementById('total-ads-watched').textContent = userState.lifetimeAdCount || 0;
+            document.getElementById('total-earned').textContent = (userState.totalEarned || 0).toFixed(2);
+            document.getElementById('earning-wallet-balance').textContent = earningWalletBalance.toFixed(2);
+            document.getElementById('move-to-balance-btn').disabled = earningWalletBalance < 50;
+
+            renderAdTask();
+            renderAdProgress();
+            renderDynamicTasks();
+            renderReferralSection();
+            renderWithdrawSection();
+            renderEarningsGraph();
+            renderDynamicLinks();
+        };
+
+        const renderAdProgress = () => {
+            const container = document.getElementById('ad-progress-container');
+            const dailyLimit = appConfig.dailyAdLimit || 1;
+            const watched = userState.dailyAdCount || 0;
+            const pct = Math.min((watched / dailyLimit) * 100, 100);
+            container.innerHTML = `
+                <div class="progress-info">
+                    <span>Daily Ad Progress</span>
+                    <span style="color:var(--gold);font-weight:700">${watched} / ${dailyLimit}</span>
+                </div>
+                <div class="progress-track">
+                    <div class="progress-fill" style="width:${pct}%;"></div>
+                </div>`;
+        };
+
+        const renderEarningsGraph = async () => {
+            const chartEl = document.getElementById('earnings-chart');
+            const labelsEl = document.getElementById('earnings-chart-labels');
+            chartEl.innerHTML = '';
+            labelsEl.innerHTML = '';
+
+            const today = new Date();
+            const dates = [];
+            for (let i = 6; i >= 0; i--) {
+                const d = new Date(today); d.setDate(today.getDate() - i);
+                dates.push(d.toISOString().slice(0, 10));
+            }
+            try {
+                const promises = dates.map(date => db.ref(`userEarnings/${tgUser.id}/${date}`).once('value'));
+                const snapshots = await Promise.all(promises);
+                const earningsData = snapshots.map(s => s.val() || 0);
+                const maxEarning = Math.max(...earningsData, 1);
+
+                earningsData.forEach((earning, i) => {
+                    const height = Math.max((earning / maxEarning) * 100, 2);
+                    const label = new Date(dates[i]).toLocaleDateString('en-US', { day: 'numeric' });
+                    const bar = document.createElement('div');
+                    bar.className = 'bar';
+                    bar.style.cssText = `height:${height}%; animation-delay:${i*0.07}s`;
+                    bar.innerHTML = `<span class="tooltip">${earning.toFixed(2)} Coin</span>`;
+                    chartEl.appendChild(bar);
+                    labelsEl.innerHTML += `<span>${label}</span>`;
+                });
+            } catch (e) {
+                chartEl.innerHTML = '<p style="opacity:0.4;font-size:0.8rem;padding:10px">No data</p>';
+            }
+        };
+
+        // ─── Ad Task ──────────────────────────────────────────────────────
+        const renderAdTask = () => {
+            const container = document.getElementById('ad-task-container');
+            const now = Date.now();
+            const onBreak = userState.breakUntil && now < userState.breakUntil;
+            const limitReached = (appConfig.dailyAdLimit > 0) && (userState.dailyAdCount >= appConfig.dailyAdLimit);
+            let html = '';
+
+            if (onBreak) {
+                const remaining = Math.ceil((userState.breakUntil - now) / 60000);
+                html = buildTaskCard('https://img.icons8.com/ios-filled/100/hourglass.png',
+                    'Break Time!', `Please wait ${remaining} more minute(s).`,
+                    `<button class="action-btn" disabled><i class="fas fa-clock"></i> Waiting</button>`);
+            } else if (limitReached) {
+                html = buildTaskCard('https://img.icons8.com/ios-filled/100/stop-circled.png',
+                    'Daily Limit Reached', 'Come back tomorrow!',
+                    `<button class="action-btn" disabled><i class="fas fa-ban"></i> Done</button>`);
+            } else {
+                html = buildTaskCard('https://img.icons8.com/ios-filled/100/play-button-circled.png',
+                    'Watch a Rewarded Ad',
+                    `Earn ${parseFloat(appConfig.adValue || 0).toFixed(2)} Coin per ad.`,
+                    `<button id="watch-ad-btn" class="action-btn"><i class="fas fa-play"></i> Watch</button>`);
+            }
+            container.innerHTML = html;
+            if (!onBreak && !limitReached) {
+                document.getElementById('watch-ad-btn').addEventListener('click', handleWatchAd);
+            }
+        };
+
+        const buildTaskCard = (iconSrc, title, desc, actionHtml, reward = null) => `
+            <div class="task-card">
+                <div class="task-icon-wrap">
+                    <img class="task-icon-img" src="${iconSrc}" alt="icon" onerror="this.src='https://img.icons8.com/ios-filled/100/star.png'">
+                </div>
+                <div class="task-info">
+                    <h3>${title}</h3>
+                    <p>${desc}</p>
+                    ${reward ? `<div class="task-reward-badge"><i class="fas fa-coins"></i> ${reward} Coin</div>` : ''}
+                </div>
+                ${actionHtml}
+            </div>`;
+
+        // ─── Watch Ad ─────────────────────────────────────────────────────
+        const handleWatchAd = async () => {
+            const dailyLimit = appConfig.dailyAdLimit || 0;
+            if (dailyLimit > 0 && userState.dailyAdCount >= dailyLimit) {
+                showAlert("You've reached the daily ad limit.");
+                return;
+            }
+            const now = Date.now();
+            if (userState.breakUntil && now < userState.breakUntil) {
+                const remaining = Math.ceil((userState.breakUntil - now) / 60000);
+                showAlert(`Please wait ${remaining} more minute(s).`);
+                return;
+            }
+            const zoneId = appConfig.adZoneId;
+            const adFunction = zoneId ? window[`show_${zoneId}`] : null;
+            if (typeof adFunction !== 'function') {
+                showAlert("Ad network is loading. Please try again in a moment.");
+                return;
+            }
+            showPopup(`<div class="popup-loader">
+                <div class="loader-ring"></div>
+                <h2 style="color:var(--text-primary);margin-top:8px">Loading Ad</h2>
+                <p>Please wait...</p>
+            </div>`);
+            try {
+                await adFunction();
+                closePopup();
+                const adValue = parseFloat(appConfig.adValue) || 0;
+                earningWalletBalance += adValue;
+                localStorage.setItem(`earningWallet_${tgUser.id}`, earningWalletBalance.toString());
+                userState.dailyAdCount = (userState.dailyAdCount || 0) + 1;
+                userState.lifetimeAdCount = (userState.lifetimeAdCount || 0) + 1;
+                userState.totalEarned = (userState.totalEarned || 0) + adValue;
+
+                const updates = {
+                    dailyAdCount: userState.dailyAdCount,
+                    lifetimeAdCount: userState.lifetimeAdCount,
+                    totalEarned: userState.totalEarned
+                };
+                const adsPerBreak = appConfig.adsPerBreak || 0;
+                if (adsPerBreak > 0 && userState.dailyAdCount % adsPerBreak === 0) {
+                    const breakEnd = Date.now() + ((appConfig.breakDuration || 5) * 60000);
+                    updates.breakUntil = breakEnd;
+                    userState.breakUntil = breakEnd;
+                }
+                await db.ref(`users/${tgUser.id}`).update(updates);
+                const todayStr = new Date().toISOString().slice(0, 10);
+                await db.ref(`userEarnings/${tgUser.id}/${todayStr}`).set(firebase.database.ServerValue.increment(adValue));
+                if (tg) tg.HapticFeedback.notificationOccurred('success');
+                showToast(`+${adValue.toFixed(2)} Coin added to Earning Wallet!`, 'success');
+                renderUI();
+            } catch (err) {
+                console.error('Ad error:', err);
+                closePopup();
+                showAlert("Ad could not be loaded. Please try again.");
+            }
+        };
+
+        // ─── Move to Balance ──────────────────────────────────────────────
+        const handleMoveToBalance = async () => {
+            if (earningWalletBalance < 50) { showAlert("You need at least 50 Coin to move."); return; }
+            const btn = document.getElementById('move-to-balance-btn');
+            btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Moving...';
+            try {
+                const amount = earningWalletBalance;
+                await db.ref(`users/${tgUser.id}/balance`).set(firebase.database.ServerValue.increment(amount));
+                userState.balance = (userState.balance || 0) + amount;
+                earningWalletBalance = 0;
+                localStorage.setItem(`earningWallet_${tgUser.id}`, '0');
+                if (tg) tg.HapticFeedback.notificationOccurred('success');
+                showToast('Successfully moved to main balance! 🎉', 'success');
+            } catch (err) {
+                console.error(err);
+                showAlert("Failed to move balance. Please try again.");
+            } finally {
+                btn.innerHTML = '<i class="fas fa-arrow-right-arrow-left"></i> Move to Main Balance';
+                renderUI();
+            }
+        };
+
+        // ─── Dynamic Tasks ────────────────────────────────────────────────
+        const renderDynamicTasks = async () => {
+            const container = document.getElementById('dynamic-tasks-container');
+            container.innerHTML = '';
+            if (!appConfig.tasks) return;
+            const clicksSnap = await db.ref(`users/${tgUser.id}/taskClicks`).once('value');
+            const taskClicks = clicksSnap.val() || {};
+            const tasks = Object.entries(appConfig.tasks).map(([key, val]) => ({ key, ...val })).reverse();
+            tasks.forEach(task => {
+                const done = userState.completedTasks && userState.completedTasks[task.key];
+                const clicked = taskClicks[task.key];
+                let btnLabel = `<i class="fas fa-gift"></i> Claim`;
+                if (done) btnLabel = `<i class="fas fa-check"></i> Claimed`;
+                else if (clicked) btnLabel = `<i class="fas fa-shield-alt"></i> Verify`;
+                const el = document.createElement('div');
+                el.innerHTML = buildTaskCard(
+                    task.icon || 'https://img.icons8.com/ios-filled/100/star.png',
+                    task.name,
+                    '',
+                    `<button class="action-btn" data-task-id="${task.key}" data-task-url="${task.url || ''}" ${done ? 'disabled' : ''}>${btnLabel}</button>`,
+                    task.reward
+                );
+                container.appendChild(el.firstElementChild);
+            });
+        };
+
+        // ─── Claim Task ───────────────────────────────────────────────────
+        const handleClaimTask = async (e) => {
+            const btn = e.target.closest('[data-task-id]');
+            if (!btn) return;
+            const taskId = btn.dataset.taskId;
+            const task = appConfig.tasks && appConfig.tasks[taskId];
+            if (!task) { showAlert('Task not found.'); return; }
+            if (userState.completedTasks && userState.completedTasks[taskId]) {
+                showAlert('Already claimed!'); return;
+            }
+            const clickedSnap = await db.ref(`users/${tgUser.id}/taskClicks/${taskId}`).once('value');
+            const alreadyClicked = clickedSnap.val();
+            if (!alreadyClicked) {
+                await db.ref(`users/${tgUser.id}/taskClicks/${taskId}`).set(true);
+                if (tg) tg.openLink(btn.dataset.taskUrl);
+                else window.open(btn.dataset.taskUrl, '_blank');
+                btn.innerHTML = '<i class="fas fa-shield-alt"></i> Verify';
+                showToast('Link opened! Come back and press Verify to claim.', 'success');
+                return;
+            }
+            btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            try {
+                const userRef = db.ref(`users/${tgUser.id}`);
+                await userRef.child(`completedTasks/${taskId}`).set(true);
+                await userRef.child('balance').set(firebase.database.ServerValue.increment(task.reward));
+                userState.balance = (userState.balance || 0) + task.reward;
+                if (!userState.completedTasks) userState.completedTasks = {};
+                userState.completedTasks[taskId] = true;
+                if (tg) tg.HapticFeedback.notificationOccurred('success');
+                showToast(`✅ +${task.reward} Coin claimed!`, 'success');
+                renderUI();
+            } catch (err) {
+                console.error(err);
+                showAlert('Failed to claim. Please try again.');
+                btn.disabled = false; btn.innerHTML = '<i class="fas fa-shield-alt"></i> Verify';
+            }
+        };
+
+        // ─── MICRO JOBS ───────────────────────────────────────────────────
+        const getMicroJobs = () => {
+            // These come from Firebase config if available, else use demo jobs
+            if (appConfig.microJobs) {
+                return Object.entries(appConfig.microJobs).map(([key, val]) => ({ key, ...val }));
+            }
+            return [
+                { key: 'mj1', title: 'Follow us on Telegram', desc: 'Join our official Telegram channel and stay up-to-date with the latest news and announcements.', difficulty: 'easy', reward: 25, duration: '2 min', category: 'Social', url: '#', icon: '📣' },
+                { key: 'mj2', title: 'Rate our App ⭐', desc: 'Give us a 5-star rating on the Telegram app store to help others discover Earn Flow.', difficulty: 'easy', reward: 30, duration: '1 min', category: 'Review', url: '#', icon: '⭐' },
+                { key: 'mj3', title: 'Share a Post on Twitter', desc: 'Share our pinned post on Twitter/X and tag 2 friends to complete this task.', difficulty: 'medium', reward: 80, duration: '5 min', category: 'Social', url: '#', icon: '🐦' },
+                { key: 'mj4', title: 'Watch a YouTube Video', desc: 'Watch our sponsored YouTube video for at least 5 minutes. Make sure to like and subscribe!', difficulty: 'medium', reward: 60, duration: '5 min', category: 'Video', url: '#', icon: '▶️' },
+                { key: 'mj5', title: 'Fill Out a Survey', desc: 'Complete a 10-question survey about your online habits. Takes about 10 minutes to finish.', difficulty: 'hard', reward: 150, duration: '10 min', category: 'Survey', url: '#', icon: '📝' },
+                { key: 'mj6', title: 'Refer 3 Friends', desc: 'Invite 3 new users to Earn Flow using your referral link. All 3 must join and verify.', difficulty: 'hard', reward: 200, duration: 'Ongoing', category: 'Referral', url: '#', icon: '👥' },
+                { key: 'mj7', title: 'Subscribe to YouTube Channel', desc: 'Subscribe to our partner YouTube channel and watch at least one video to completion.', difficulty: 'easy', reward: 20, duration: '3 min', category: 'Video', url: '#', icon: '🔔' },
+                { key: 'mj8', title: 'Join Discord Server', desc: 'Join our Discord server and send a message in the #introductions channel.', difficulty: 'medium', reward: 50, duration: '4 min', category: 'Social', url: '#', icon: '💬' },
+            ];
+        };
+
+        const renderMicroJobs = () => {
+            const container = document.getElementById('micro-jobs-container');
+            const jobs = getMicroJobs();
+            const filtered = activeJobFilter === 'all' ? jobs
+                : activeJobFilter === 'completed' ? jobs.filter(j => completedMicroJobs[j.key])
+                : jobs.filter(j => j.difficulty === activeJobFilter);
+
+            container.innerHTML = '';
+            if (filtered.length === 0) {
+                container.innerHTML = `<div class="empty-state">
+                    <i class="fas fa-briefcase"></i>
+                    <p>No jobs in this category yet.</p>
+                </div>`;
+                return;
+            }
+            filtered.forEach((job, idx) => {
+                const done = !!completedMicroJobs[job.key];
+                const card = document.createElement('div');
+                card.className = 'micro-job-card';
+                card.style.animationDelay = `${idx * 0.06}s`;
+                card.innerHTML = `
+                    <div class="micro-job-header">
+                        <span style="font-size:1.4rem">${job.icon || '💼'}</span>
+                        <span class="micro-job-title">${job.title}</span>
+                        <span class="micro-job-badge ${job.difficulty}">${job.difficulty}</span>
+                    </div>
+                    <div class="micro-job-body">
+                        <p class="micro-job-desc">${job.desc}</p>
+                        <div class="micro-job-meta">
+                            <span class="meta-pill"><i class="fas fa-clock"></i> ${job.duration}</span>
+                            <span class="meta-pill"><i class="fas fa-tag"></i> ${job.category}</span>
+                            ${done ? `<span class="meta-pill" style="color:var(--green);border-color:rgba(6,214,160,0.3)"><i class="fas fa-check-circle"></i> Completed</span>` : ''}
+                        </div>
+                    </div>
+                    <div class="micro-job-footer">
+                        <div>
+                            <div class="reward-label">Reward</div>
+                            <div class="reward-amount"><i class="fas fa-coins" style="font-size:0.85rem"></i> ${job.reward} Coin</div>
+                        </div>
+                        <button class="action-btn${done ? ' ghost' : ''}" data-micro-job-id="${job.key}" data-micro-job-url="${job.url}" ${done ? 'disabled' : ''}>
+                            ${done ? '<i class="fas fa-check"></i> Done' : '<i class="fas fa-arrow-right"></i> Start'}
+                        </button>
+                    </div>`;
+                container.appendChild(card);
+            });
+        };
+
+        const handleMicroJob = async (e) => {
+            const btn = e.target.closest('[data-micro-job-id]');
+            if (!btn || btn.disabled) return;
+            const jobId = btn.dataset.microJobId;
+            const jobUrl = btn.dataset.microJobUrl;
+            const jobs = getMicroJobs();
+            const job = jobs.find(j => j.key === jobId);
+            if (!job) return;
+
+            // Check if already clicked
+            const clickedSnap = await db.ref(`users/${tgUser.id}/microJobClicks/${jobId}`).once('value');
+            const alreadyClicked = clickedSnap.val();
+
+            if (!alreadyClicked) {
+                await db.ref(`users/${tgUser.id}/microJobClicks/${jobId}`).set(true);
+                if (tg && jobUrl !== '#') tg.openLink(jobUrl);
+                else if (jobUrl !== '#') window.open(jobUrl, '_blank');
+                btn.innerHTML = '<i class="fas fa-shield-alt"></i> Verify & Claim';
+                showToast('Task started! Come back to verify.', 'success');
+                return;
+            }
+
+            // Claim reward
+            btn.disabled = true; btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+            try {
+                await db.ref(`users/${tgUser.id}/completedMicroJobs/${jobId}`).set(true);
+                await db.ref(`users/${tgUser.id}/balance`).set(firebase.database.ServerValue.increment(job.reward));
+                await db.ref(`users/${tgUser.id}/totalEarned`).set(firebase.database.ServerValue.increment(job.reward));
+                completedMicroJobs[jobId] = true;
+                userState.balance = (userState.balance || 0) + job.reward;
+                userState.totalEarned = (userState.totalEarned || 0) + job.reward;
+                if (tg) tg.HapticFeedback.notificationOccurred('success');
+                showToast(`🎉 +${job.reward} Coin earned from micro job!`, 'success');
+                renderUI();
+                renderMicroJobs();
+            } catch (err) {
+                console.error(err);
+                showAlert('Failed to claim. Please try again.');
+                btn.disabled = false;
+                btn.innerHTML = '<i class="fas fa-shield-alt"></i> Verify & Claim';
+            }
+        };
+
+        // ─── Referral Section ─────────────────────────────────────────────
+        const renderReferralSection = () => {
+            const container = document.getElementById('referral-section');
+            const botUsername = appConfig.botUsername || '';
+            const refLink = `https://t.me/${botUsername}/app?startapp=${tgUser.id}`;
+            container.innerHTML = `
+                <div class="referral-card">
+                    <div class="referral-title">🔗 Refer & Earn!</div>
+                    <p class="referral-desc">Invite friends and earn <span style="color:var(--gold);font-weight:700">${appConfig.referralBonus || 0} Coin</span> per referral.</p>
+                    <div class="referral-link-box">
+                        <input type="text" id="referral-link" value="${refLink}" readonly>
+                        <button id="copy-ref-link-btn" class="action-btn"><i class="fas fa-copy"></i></button>
+                    </div>
+                </div>`;
+        };
+
+        // ─── Withdraw Section ─────────────────────────────────────────────
+        const renderWithdrawSection = () => {
+            const container = document.getElementById('withdraw-section');
+            let optionsHtml = '';
+            if (appConfig.withdrawMethods) {
+                appConfig.withdrawMethods.forEach(m => {
+                    optionsHtml += `<option value="${m.name}">${m.name} (Min: ${m.min} Coin)</option>`;
+                });
+            }
+            const minRefs = appConfig.minimumWithdrawReferrals || 0;
+            const refNotice = minRefs > 0
+                ? `<p style="font-size:0.82rem;background:rgba(245,166,35,0.08);border:1px solid rgba(245,166,35,0.2);border-radius:8px;padding:10px;margin-bottom:12px;color:var(--gold)">
+                    ⚠️ You need at least <b>${minRefs} referrals</b> to withdraw.
+                   </p>` : '';
+            container.innerHTML = `
+                <div class="form-card">
+                    <h3><i class="fas fa-wallet" style="color:var(--accent)"></i> Request Withdrawal</h3>
+                    ${refNotice}
+                    <form id="withdraw-form">
+                        <div class="form-group">
+                            <label class="form-label">Payment Method</label>
+                            <select id="withdraw-method" class="form-select" required>${optionsHtml}</select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Account Number / ID</label>
+                            <input type="text" id="account-number" class="form-input" required placeholder="Enter account number">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Amount (Coin)</label>
+                            <input type="number" step="any" min="1" id="amount" class="form-input" required placeholder="Enter amount">
+                        </div>
+                        <button type="submit" id="withdraw-submit-btn" class="action-btn full" style="margin-top:8px">
+                            <i class="fas fa-paper-plane"></i> Submit Request
+                        </button>
+                    </form>
+                </div>`;
+        };
+
+        // ─── Dynamic Links ────────────────────────────────────────────────
+        const renderDynamicLinks = () => {
+            const container = document.getElementById('dynamic-links-container');
+            container.innerHTML = '';
+            if (!appConfig.links) return;
+            const links = Object.entries(appConfig.links).map(([key, val]) => ({ key, ...val })).reverse();
+            if (links.length > 0) {
+                const header = document.createElement('div');
+                header.className = 'section-header';
+                header.innerHTML = '<div class="section-title">Featured Links</div>';
+                container.appendChild(header);
+            }
+            links.forEach(link => {
+                const el = document.createElement('div');
+                el.innerHTML = buildTaskCard(
+                    link.icon || 'https://img.icons8.com/ios-filled/100/link.png',
+                    link.name, '',
+                    `<button class="action-btn ghost" onclick="${tg ? `window.Telegram.WebApp.openLink('${link.url}')` : `window.open('${link.url}', '_blank')`}"><i class="fas fa-external-link-alt"></i> Visit</button>`
+                );
+                container.appendChild(el.firstElementChild);
+            });
+        };
+
+        // ─── Withdrawal History ───────────────────────────────────────────
+        const renderWithdrawalHistory = () => {
+            const listEl = document.getElementById('withdrawal-history-list');
+            if (userTransactions.length === 0) {
+                listEl.innerHTML = `<div class="empty-state">
+                    <i class="fas fa-receipt"></i>
+                    <p>No withdrawal history yet.</p>
+                </div>`;
+                return;
+            }
+            listEl.innerHTML = userTransactions.map(item => {
+                const ts = typeof item.timestamp === 'number' ? item.timestamp : Date.now();
+                return `
+                <div class="history-item">
+                    <div class="history-details">
+                        <p>${parseFloat(item.amount).toFixed(2)} Coin · ${item.method}</p>
+                        <small>${new Date(ts).toLocaleString()}</small>
+                    </div>
+                    <span class="history-status status-${item.status}">${item.status}</span>
+                </div>`;
+            }).join('');
+        };
+
+        // ─── Leaderboard ──────────────────────────────────────────────────
+        const renderLeaderboard = () => {
+            const activeBoard = document.querySelector('.toggle-btn.active').dataset.board;
+            const listId = activeBoard === 'referral' ? 'referral-leaderboard-list' : 'earning-leaderboard-list';
+            const listEl = document.getElementById(listId);
+            const data = leaderboardData[activeBoard];
+            document.getElementById('referral-board').style.display = activeBoard === 'referral' ? 'block' : 'none';
+            document.getElementById('earning-board').style.display  = activeBoard === 'earning'  ? 'block' : 'none';
+            listEl.innerHTML = '';
+            if (!data || data.length === 0) {
+                listEl.innerHTML = '<div class="empty-state"><i class="fas fa-chart-bar"></i><p>No data yet.</p></div>';
+                return;
+            }
+            data.forEach((user, i) => {
+                const score = activeBoard === 'referral'
+                    ? (user.referrals || 0)
+                    : parseFloat(user.totalEarned || 0).toFixed(2);
+                const rankClass = i === 0 ? 'rank-1' : i === 1 ? 'rank-2' : i === 2 ? 'rank-3' : '';
+                const rankIcon = i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `#${i+1}`;
+                const li = document.createElement('li');
+                li.className = 'leaderboard-item';
+                li.innerHTML = `
+                    <span class="rank ${rankClass}">${rankIcon}</span>
+                    <img src="${user.photoUrl || 'https://via.placeholder.com/40'}" alt="User" onerror="this.src='https://via.placeholder.com/40'">
+                    <span class="leaderboard-name">${user.firstName || 'User'}</span>
+                    <span class="leaderboard-score">${score}</span>`;
+                listEl.appendChild(li);
+            });
+        };
+
+        // ─── Navigation ───────────────────────────────────────────────────
+        const setupNavigation = () => {
+            const navButtons = document.querySelectorAll('.nav-btn');
+            const pages = document.querySelectorAll('.page');
+            navButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const pageId = btn.dataset.page;
+                    pages.forEach(p => p.classList.remove('active'));
+                    document.getElementById(pageId).classList.add('active');
+                    navButtons.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    if (pageId === 'profile-page') renderWithdrawalHistory();
+                    if (pageId === 'leaderboard-page') renderLeaderboard();
+                    if (pageId === 'jobs-page') renderMicroJobs();
+                });
+            });
+        };
+
+        // ─── Withdraw Handler ─────────────────────────────────────────────
+        const handleWithdraw = async (e) => {
+            if (!e.target.matches('#withdraw-form')) return;
+            e.preventDefault();
+            const minRefs = appConfig.minimumWithdrawReferrals || 0;
+            const userRefs = userState.referrals || 0;
+            if (minRefs > 0 && userRefs < minRefs) {
+                showAlert(`You need at least ${minRefs} referrals to withdraw. You have ${userRefs}.`);
+                return;
+            }
+            const methodEl = document.getElementById('withdraw-method');
+            const accountNumber = document.getElementById('account-number').value.trim();
+            const amount = parseFloat(document.getElementById('amount').value);
+            const selectedMethod = appConfig.withdrawMethods && appConfig.withdrawMethods.find(m => m.name === methodEl.value);
+            if (!accountNumber) { showAlert("Please enter your account number."); return; }
+            if (isNaN(amount) || amount <= 0) { showAlert("Please enter a valid amount."); return; }
+            if (!selectedMethod) { showAlert("Invalid withdrawal method."); return; }
+            if (amount < selectedMethod.min) { showAlert(`Minimum for ${selectedMethod.name} is ${selectedMethod.min} Coin.`); return; }
+            if (amount > (userState.balance || 0)) { showAlert("Insufficient balance."); return; }
+
+            const submitBtn = document.getElementById('withdraw-submit-btn');
+            submitBtn.disabled = true; submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Submitting...';
+            userState.balance -= amount; renderUI();
+            try {
+                const userRef = db.ref(`users/${tgUser.id}`);
+                await userRef.child('balance').set(firebase.database.ServerValue.increment(-amount));
+                const reqId = db.ref('withdrawals/pending').push().key;
+                const newRequest = {
+                    id: reqId, userId: tgUser.id,
+                    userName: `${userState.firstName || ''} ${userState.lastName || ''}`.trim(),
+                    method: selectedMethod.name, account: accountNumber,
+                    amount: amount, status: 'pending', timestamp: Date.now()
+                };
+                await db.ref(`withdrawals/pending/${reqId}`).set({ ...newRequest, timestamp: firebase.database.ServerValue.TIMESTAMP });
+                userTransactions.unshift(newRequest);
+                renderWithdrawalHistory();
+                if (tg) tg.HapticFeedback.notificationOccurred('success');
+                showToast('Withdrawal request submitted! ✅', 'success');
+                document.getElementById('withdraw-form').reset();
+            } catch (err) {
+                console.error(err);
+                userState.balance += amount;
+                showAlert("Failed to submit. Your balance has been restored.");
+            } finally {
+                submitBtn.disabled = false; submitBtn.innerHTML = '<i class="fas fa-paper-plane"></i> Submit Request';
+                renderUI();
+            }
+        };
+
+        // ─── Copy Referral ────────────────────────────────────────────────
+        const copyReferralLink = () => {
+            const refInput = document.getElementById('referral-link');
+            const refText = refInput.value;
+            if (navigator.clipboard && navigator.clipboard.writeText) {
+                navigator.clipboard.writeText(refText)
+                    .then(() => { if (tg) tg.HapticFeedback.notificationOccurred('success'); showToast('Referral link copied! 🔗', 'success'); })
+                    .catch(() => fallbackCopy(refInput));
+            } else { fallbackCopy(refInput); }
+        };
+        const fallbackCopy = (inputEl) => {
+            inputEl.select(); inputEl.setSelectionRange(0, 99999);
+            try { document.execCommand('copy'); showToast('Referral link copied! 🔗', 'success'); }
+            catch (e) { showAlert("Could not copy. Please copy manually."); }
+        };
+
+        // ─── Event Listeners ──────────────────────────────────────────────
+        const setupEventListeners = () => {
+            popup.addEventListener('click', (e) => {
+                if (e.target === popup || e.target.classList.contains('popup-close-btn')) closePopup();
+            });
+            document.querySelector('.leaderboard-toggle').addEventListener('click', (e) => {
+                if (e.target.classList.contains('toggle-btn')) {
+                    document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
+                    e.target.classList.add('active');
+                    renderLeaderboard();
+                }
+            });
+            document.getElementById('dynamic-tasks-container').addEventListener('click', (e) => handleClaimTask(e));
+            document.getElementById('profile-page').addEventListener('submit', (e) => handleWithdraw(e));
+            document.getElementById('referral-section').addEventListener('click', (e) => {
+                if (e.target.id === 'copy-ref-link-btn' || e.target.closest('#copy-ref-link-btn')) copyReferralLink();
+            });
+            document.getElementById('move-to-balance-btn').addEventListener('click', handleMoveToBalance);
+            // Micro jobs
+            document.getElementById('micro-jobs-container').addEventListener('click', (e) => handleMicroJob(e));
+            // Jobs filter tabs
+            document.getElementById('jobs-filter-tabs').addEventListener('click', (e) => {
+                const tab = e.target.closest('.filter-tab');
+                if (!tab) return;
+                document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                activeJobFilter = tab.dataset.filter;
+                renderMicroJobs();
+            });
+        };
+
+        // ─── Start ────────────────────────────────────────────────────────
+        initApp();
+    });
+    </script>
+</body>
+</html>
